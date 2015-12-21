@@ -1,0 +1,24 @@
+'use strict';
+
+function ORM(book) {
+  var model = { };
+
+  <%- declarations %>
+  <% vars.forEach(function(name){ %>
+         var _<%= name %>= book.Model.extend(<%= name %>);
+         model.<%= name %> = _<%= name %>;
+  <% });  %>
+  return model;
+}
+
+// Constructor for a new `Bookshelf` object, it accepts
+// an active `knex` instance and initializes the appropriate
+// `Model` and `Collection` constructors for use in the current instance.
+ORM.initialize = function (book) {
+  return new ORM(book);
+};
+
+// Finally, export `Bookshelf` to the world.
+exports['default'] = ORM;
+module.exports = exports['default'];
+

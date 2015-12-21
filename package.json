@@ -1,0 +1,61 @@
+{
+  "name": "grunt-build",
+  "description": "custom build services",
+  "version": "0.1.0",
+  "homepage": "https://github.com/max/build",
+  "author": {
+    "name": "TFC",
+    "email": "maxkerrer@126.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/max/build.git"
+  },
+  "bugs": {
+    "url": "https://github.com/max/build/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/max/build/blob/master/LICENSE-MIT"
+    }
+  ],
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "^0.9.2",
+    "grunt-contrib-clean": "^0.5.0",
+    "grunt-contrib-nodeunit": "^0.3.3",
+    "grunt": "~0.4.5"
+  },
+  "keywords": [
+    "gruntplugin"
+  ],
+  "dependencies": {
+    "doctrine": "^0.7.2",
+    "ejs": "^2.3.4",
+    "escodegen": "^1.7.1",
+    "escomplex": "^1.3.0",
+    "espree": "^2.2.5",
+    "esprima": "^2.7.1",
+    "estraverse": "^4.1.1",
+    "js-beautify": "^1.5.10",
+    "jsdoc": "^3.4.0",
+    "jsdoc-parse": "^1.2.1",
+    "string": "^3.3.1",
+    "uglify-js": "^2.4.24",
+    "xregexp": "^2.0.0"
+  },
+  "dep-deps": "enclose,nexe",
+  "gitHead": "57f28c3dfb8f526a13253948335640c6610bde34",
+  "readme": "# grant-max-build\n\n> custom build services\n\n## Getting Started\nThis plugin requires Grunt `~0.4.5`\n\nIf you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:\n\n```shell\nnpm install grant-max-build --save-dev\n```\n\nOnce the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:\n\n```js\ngrunt.loadNpmTasks('grant-max-build');\n```\n\n## The \"grant_max_build\" task\n\n### Overview\nIn your project's Gruntfile, add a section named `grant_max_build` to the data object passed into `grunt.initConfig()`.\n\n```js\ngrunt.initConfig({\n  grant_max_build: {\n    options: {\n      // Task-specific options go here.\n    },\n    your_target: {\n      // Target-specific file lists and/or options go here.\n    },\n  },\n});\n```\n\n### Options\n\n#### options.separator\nType: `String`\nDefault value: `',  '`\n\nA string value that is used to do something with whatever.\n\n#### options.punctuation\nType: `String`\nDefault value: `'.'`\n\nA string value that is used to do something else with whatever else.\n\n### Usage Examples\n\n#### Default Options\nIn this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`\n\n```js\ngrunt.initConfig({\n  grant_max_build: {\n    options: {},\n    files: {\n      'dest/default_options': ['src/testing', 'src/123'],\n    },\n  },\n});\n```\n\n#### Custom Options\nIn this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`\n\n```js\ngrunt.initConfig({\n  grant_max_build: {\n    options: {\n      separator: ': ',\n      punctuation: ' !!!',\n    },\n    files: {\n      'dest/default_options': ['src/testing', 'src/123'],\n    },\n  },\n});\n```\n\n## Contributing\nIn lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).\n\n## Release History\n_(Nothing yet)_\n# grunt-max-build\n",
+  "readmeFilename": "README.md",
+  "_id": "grunt-contrib-service@0.1.0",
+  "_shasum": "f18c924be7655d2a61dde607cc4ac1ce420ec012",
+  "_from": "git+https://github.com/kerrer/grunt-contrib-service.git",
+  "_resolved": "git+https://github.com/kerrer/grunt-contrib-service.git#57f28c3dfb8f526a13253948335640c6610bde34"
+}

@@ -1,0 +1,61 @@
+var Log = require('log')();
+var Config = require('config')();
+var db = require('node-db')('mysql').connect();
+var Err = require('exception');
+<%- content %>
+<% var export_services="";
+services.forEach(function(serv){ 
+	if(serv.service ===1 && typeof serv.deprecated === 'undefined'){
+	      export_services = export_services + "'" + serv.call_name + "':_"+serv.name + ","; 
+%>
+          var  _<%= serv.name %> = function(s,cb){
+             try {
+				s = getJson(s);
+				<% var callback=false;var param="";
+	            serv.seq_params.forEach(function(p){	
+		          if(serv.params[p].type==="callback"){
+			         param=param + "function(err,result){  if(err){ error(err,cb); }else{ cb(result);} },";
+			         callback= true;
+		          }else{
+			         param=param + "s." + p + ",";
+		          }
+	           });	      
+	         %>
+	         <% if(callback){ %>
+		         <%=serv.name%>(<%=param.substring(0,param.length-1);%>);	  
+	         <% }else{ %>
+	             var result=<%=serv.name%>(<%=param.substring(0,param.length-1);%>);
+	             cb(result);
+             <% } %>
+            }catch (err) {
+              error(err,cb);
+            } <%# try...catch %>
+          };   <%# var function %>
+     <% } %>   <%# if(serv.service ===1 %>
+<% }); %> <%# forEach %>
+
+var getJson= function(t){
+   if(typeof t === "string"){
+      var json=null;
+      try {
+          json = JSON.parse(t);
+      } catch (e) {
+          console.error("not JSON");
+      }
+      return json;
+   }
+   return t;
+};
+
+var error = function(err,cb){
+    Log.error(err.message,err.stack);
+    cb(JSON.stringify({
+          code: err.statusCode,
+          msg: err.message
+    }));
+};
+<% if(export_services!==""){ %>
+var services={<%- export_services.substring(0,export_services.length-1) %>};
+exports.services=services;
+<% } %>
+

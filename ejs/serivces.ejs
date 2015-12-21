@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title></title>
+<style>
+   tr td{
+     border-bottom:1px solid #cccccc;
+     padding:10px 5px;
+  }
+</style>
+</head>
+<body>
+<h2>services</h2>
+<% Object.keys(services).forEach(function(sv){ %>
+   <h3><%= sv %>.js</h3>
+   <hr/>
+   <table>
+   <tr>
+   <th style="width:120px">接口名称</th>
+   <th style="width:120px">方法名称</th>
+   <th style="width:500px">接口描述</th>
+   <th style="width:300px">服务弃用</th>
+   </tr>
+   <% services[sv].forEach(function(s){ %>
+       <tr>       
+       <td><%= s.call_name %></td>    
+       <td><%= s.name %>()</td>   
+       <td><%= s.description %></td>
+       <td>
+         <% if(s.deprecated === 1){%>
+            <%= s.deprecated_message %>
+         <% }else{ %>
+            无
+         <% } %>
+       </td>
+       </tr>
+   <% }) %>
+   </table>
+<% }) %>
+</body>
+</html>
