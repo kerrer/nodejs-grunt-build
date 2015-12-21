@@ -1,6 +1,6 @@
 var Log = require('log')();
 var Config = require('config')();
-var db = require('node-db')('mysql').connect();
+var db = require('db')('mysql').connect();
 var Err = require('exception');
 <%- content %>
 <% var export_services="";
