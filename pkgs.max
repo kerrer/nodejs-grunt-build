@@ -1,0 +1,6 @@
+    "escodegen": "^1.7.1",
+    "escomplex": "^1.3.0",
+        "esprima": "^2.7.1",
+            "jsdoc": "^3.4.0",
+    "jsdoc-parse": "^1.2.1",
+        "xregexp": "^2.0.0"
