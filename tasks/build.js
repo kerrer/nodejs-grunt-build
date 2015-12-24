@@ -14,7 +14,6 @@ var	estraverse = require('estraverse'),
 	path = require('path');
 var S = require('string');
 var ejs = require('ejs');
-var XRegExp = require('xregexp').XRegExp;
 var minify = require("uglify-js").minify;
 var beautify = require('js-beautify').js_beautify;
 var espree = require("espree");
