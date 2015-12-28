@@ -24,6 +24,7 @@ var allservices = "all.services";
 var allfiles = "all.files";
 var report_file_name="all_services";
 var db_adapters = ['mysql','postgresql','mongodb'];
+var service_ext="Service.js";
 
 String.prototype.replaceBetween = function(start, end, what) {
     return this.substring(0, start) + what + this.substring(end);
@@ -198,7 +199,7 @@ module.exports = function(grunt) {
 	}
 	
 	function check(filename, targetdir) {
-		grunt.log.ok("Service from: " + filename);
+		grunt.log.ok("Service file from: " + filename);
 		try {
 			var content = S(grunt.file.read(filename)).trimRight().s;
 			//var tree = esprima.parse(content, { attachComment: true,loc: true});
@@ -255,7 +256,7 @@ module.exports = function(grunt) {
 			if (!grunt.file.exists(targetdir) || !grunt.file.isDir(targetdir)) {
 				grunt.file.mkdir(targetdir);
 			}
-			if (S(filename).startsWith("service_") && path.extname(filename) === ".js") {
+			if (S(filename).endsWith(service_ext)) {
 				files.push(S(abspath).chompLeft('src/main').s);
 				check(abspath, targetdir);
 			} else if (path.extname(filename) === ".js") {
@@ -336,7 +337,7 @@ module.exports = function(grunt) {
 	}
 
 	function buildService(filename) {
-		filename = "service_" + filename + ".js";
+		filename =  filename + service_ext;
 		grunt.log.writeln("start build  service file - " + filename);
 		check(path.join(sourceFold, filename));
 		saveToHtml(path.basename(filename));
