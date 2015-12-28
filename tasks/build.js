@@ -99,6 +99,9 @@ module.exports = function(grunt) {
 					serv.service = 1;
 					serv.call_name = tag.description ? tag.description.toLowerCase() : node.id.name.toLowerCase();
 					break;
+				case "promise":
+					serv.promise = 1;
+					break;
 				case "deprecated":
 					serv.deprecated = tag.description  ? tag.description : "接口不再使用";
 					break;
@@ -144,7 +147,7 @@ module.exports = function(grunt) {
 		cb(null,"success");
 	}
     
-    function checkModReq(content,comment){
+    function trimModDescription(content,comment){
 		var data = doctrine.parse(comment.value, {unwrap: true	}); 
 		var is_module_desc=false;
 		var requires=[];
@@ -154,10 +157,7 @@ module.exports = function(grunt) {
 					is_module_desc=true;
 					break;
 				case "requires":
-					var mod = getRequiredMod(tag.name.split('#'));
-					if(mod){
-						requires.push(mod);
-					}
+				    requires.push(tag.name);					
 					break;
 				default:
 					break;
@@ -165,9 +165,9 @@ module.exports = function(grunt) {
 		});
 		
 		if(is_module_desc && requires){
-			content = content.replaceBetween(comment.range[0],comment.range[1], requires.join('\n'));
+			content = content.replaceBetween(comment.range[0],comment.range[1], "");
 		}
-		return content;
+		return [content,requires];
 	}
 	
 	function getRequiredMod(tag){
@@ -175,6 +175,7 @@ module.exports = function(grunt) {
 		if(!tag){
 			return req;
 		}
+		var mod = getRequiredMod(tag.name.split('#'));
 		switch (tag[0]) {
 			case "Log":
 				//req = "var Log=require('log')();";
@@ -204,7 +205,9 @@ module.exports = function(grunt) {
 			var content = S(grunt.file.read(filename)).trimRight().s;
 			//var tree = esprima.parse(content, { attachComment: true,loc: true});
 			var tree = espree.parse(content,{ range: true, loc: true, comments: true,attachComment: true,});		
-		    content = checkModReq(content, tree.comments[0]);
+		    var res = trimModDescription(content, tree.comments[0]);
+		    var requires = _.union(res[1],['Log']);;
+		    content = res[0];
 			estraverse.traverse(tree, {
 				enter: function (node, parent) {
 					//if (node.type == 'FunctionExpression' || node.type == 'FunctionDeclaration')
@@ -230,12 +233,13 @@ module.exports = function(grunt) {
 			});
 
 			var basename = path.basename(filename, '.js');
-
-			var fun_template = grunt.file.read(path.join(__dirname, "../ejs/function.ejs"));
+            var service_temp_file= path.join(__dirname, "../ejs/service.ejs");
+			var fun_template = grunt.file.read(service_temp_file);
 			var data = ejs.render(fun_template, {
 				"services": services[basename],
-				"content" : content
-			});
+				"content" : content,
+				"requires": requires
+			},{filename:service_temp_file});
 			
 			var result = indev ? beautify(data, {
 				indent_size: 4, max_preserve_newlines: 1
@@ -344,9 +348,8 @@ module.exports = function(grunt) {
 	}
 
 	function saveToHtml(outname) {
-		var content = ejs.render(grunt.file.read(path.join(__dirname, "../ejs/serivces.ejs")), {
-			"services": services
-		});
+		var report_temp_file= path.resolve(path.join(__dirname, "../ejs/reports.ejs"));
+		var content = ejs.render(grunt.file.read(report_temp_file), {"services": services},{filename:report_temp_file});
 		grunt.file.write(path.join(outFold, outname + ".html"), content);
 		grunt.log.ok("REPORT IS SUCCESSFULLY SAVED TO ", outname + ".html");
 	}

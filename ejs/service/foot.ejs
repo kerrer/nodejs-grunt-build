@@ -1,0 +1,24 @@
+var getJson= function(t){
+   if(typeof t === "string"){
+      var json=null;
+      try {
+          json = JSON.parse(t);
+      } catch (e) {
+          console.error("not JSON");
+      }
+      return json;
+   }
+   return t;
+};
+
+var error = function(err,cb){
+    Log.error(err.message,err.stack);
+    cb(JSON.stringify({
+          code: err.statusCode,
+          message: err.message
+    }));
+};
+<% if(export_services!==""){ %>
+var services={<%- export_services.substring(0,export_services.length-1) %>};
+exports.services=services;
+<% } %>

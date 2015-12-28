@@ -1,0 +1,17 @@
+<%- include('service/head', {requires: requires}) ; %>  
+
+<%- content %>
+
+<% var export_services="";
+services.forEach(function(serv){ 
+	if(serv.service ===1 && typeof serv.deprecated === 'undefined'){
+		export_services = export_services + "'" + serv.call_name + "':_"+serv.name + ","; 
+%>
+        var  _<%= serv.name %> = function(s,cb){
+			<% var tmp = serv.promise ? 'promise' : 'default'; %>	
+			<%- include('service/'+tmp, {serv: serv}) ; %>          
+		}; <%# var function %>
+	<% } %>   <%# if(serv.service ===1 %>
+<% }); %> <%# forEach %>
+
+<%- include('service/foot', {export_services: export_services}) ; %>  

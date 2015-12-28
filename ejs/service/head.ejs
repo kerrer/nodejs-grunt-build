@@ -1,0 +1,34 @@
+/****************************************************************************/
+<%
+
+var mods=[];
+requires.forEach(function(mod){
+	var tag = mod.split('#');
+	switch (tag[0]) {
+			case "Log":
+				mods.push("var Log=require('log')();");
+				break;
+			case "Err":
+				mods.push("var Err=require('exception');");
+				break;
+			case "Config":
+				mods.push("var Config = require('nodejs-config')();");
+				break;
+			case "Promise":
+				mods.push("var Promise = require('bluebird');");
+				break;
+			case "db":
+			    var dbAdapter="mysql";
+			    if(tag[1]){
+					dbAdapter = tag[1];
+				}
+				mods.push("var db = require('node-db')('" + dbAdapter + "').connect();");
+				break;
+			default:
+				break;
+	}
+});
+%>
+
+<%- mods.join('\n'); %>
+/****************************************************************************/

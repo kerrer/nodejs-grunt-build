@@ -1,0 +1,15 @@
+
+s = getJson(s);
+<% var callback=false;var param="";
+	serv.seq_params.forEach(function(p){
+		param=param + "s." + p + ",";			
+	});	      
+%>
+
+var result=<%=serv.name%>(<%=param.substring(0,param.length-1);%>).then(function(result){
+	cb(result);
+},function(error){
+	error(err,cb);
+}).catch(function(e) {
+    error(e,cb);
+});
