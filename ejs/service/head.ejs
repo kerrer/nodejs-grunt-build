@@ -12,7 +12,7 @@ requires.forEach(function(mod){
 				mods.push("var Err=require('exception');");
 				break;
 			case "Config":
-				mods.push("var Config = require('nodejs-config')();");
+				mods.push("var Config = require('config')();");
 				break;
 			case "Promise":
 				mods.push("var Promise = require('bluebird');");
@@ -22,7 +22,7 @@ requires.forEach(function(mod){
 			    if(tag[1]){
 					dbAdapter = tag[1];
 				}
-				mods.push("var db = require('node-db')('" + dbAdapter + "').connect();");
+				mods.push("var db = require('db')('" + dbAdapter + "').connect();");
 				break;
 			default:
 				break;

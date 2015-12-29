@@ -147,11 +147,11 @@ module.exports = function(grunt) {
 		cb(null,"success");
 	}
     
-    function trimModDescription(content,comment){
+    function trimModDescription(content,comment){ 
 		var data = doctrine.parse(comment.value, {unwrap: true	}); 
 		var is_module_desc=false;
 		var requires=[];
-		data.tags.forEach(function(tag) {
+		data.tags.forEach(function(tag) { 
 			switch (tag.title) {
 				case "module":
 					is_module_desc=true;
@@ -167,36 +167,8 @@ module.exports = function(grunt) {
 		if(is_module_desc && requires){
 			content = content.replaceBetween(comment.range[0],comment.range[1], "");
 		}
+
 		return [content,requires];
-	}
-	
-	function getRequiredMod(tag){
-		var req="";
-		if(!tag){
-			return req;
-		}
-		var mod = getRequiredMod(tag.name.split('#'));
-		switch (tag[0]) {
-			case "Log":
-				//req = "var Log=require('log')();";
-				break;
-			case "Err":
-				req = "var Err=require('exception');";
-				break;
-			case "Config":
-				req = "var Config = require('nodejs-config')();";
-				break;
-			case "db":
-			    var dbAdapter="mysql";
-			    if(tag[1] && _.findIndex(db_adapters,tag[1])!== -1){
-					dbAdapter = tag[1];
-				}
-				req = "var db = require('node-db')('" + dbAdapter + "').connect();";
-				break;
-			default:
-				break;
-		}
-		return req;
 	}
 	
 	function check(filename, targetdir) {
@@ -206,7 +178,7 @@ module.exports = function(grunt) {
 			//var tree = esprima.parse(content, { attachComment: true,loc: true});
 			var tree = espree.parse(content,{ range: true, loc: true, comments: true,attachComment: true,});		
 		    var res = trimModDescription(content, tree.comments[0]);
-		    var requires = _.union(res[1],['Log']);;
+		    var requires = _.union(res[1],['Log']);
 		    content = res[0];
 			estraverse.traverse(tree, {
 				enter: function (node, parent) {
