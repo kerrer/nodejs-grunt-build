@@ -11,75 +11,75 @@ var fs = require('fs'),
     esprima = require('esprima'),
     estraverse = require('estraverse'),
     doctrine = require('doctrine'),
-    path  = require('path');
+    path = require('path');
 var S = require('string');
 var ejs = require('ejs');
-var   walk    = require('walk');
+var walk = require('walk');
 var rmdir = require('rimraf');
 var XRegExp = require('xregexp').XRegExp;
-var services={};
-var names=[];
+var services = {};
+var names = [];
 var curFile;
 var debug = require('debug')('worker');
 
-function analyze(node) {   
+function analyze(node) {
     var comment, data, params;
-    var sv ={};
+    var sv = {};
 
     comment = node.leadingComments[0];
     if (comment.type !== 'Block') {
         return -1;
-    }   
-    
+    }
+
     data = doctrine.parse(comment.value, {unwrap: true});
-    
-    sv.name =  node.id.name;
+
+    sv.name = node.id.name;
     params = [];
     data.tags.forEach(function (tag) {
-    	switch (tag.title){
-    	   case "param":
-    		    params[tag.name] = tag.description;    		    
-    		    break;
-    	   case "service":
-    		   sv.service= 1;
-    		   sv.call_name= tag.description !== null ? tag.description : node.id.name;
-    		   break;
-    	   case "deprecated":
-    		   sv.deprecated=1;
-    		   sv.deprecated_message= tag.description !== null ? tag.description : "";
-    		   break;
-    	   default:
-    	   
+        switch (tag.title) {
+            case "param":
+                params[tag.name] = tag.description;
+                break;
+            case "service":
+                sv.service = 1;
+                sv.call_name = tag.description !== null ? tag.description : node.id.name;
+                break;
+            case "deprecated":
+                sv.deprecated = 1;
+                sv.deprecated_message = tag.description !== null ? tag.description : "";
+                break;
+            default:
+
         }
     });
-   
+
     sv.params = params;
     sv.description = data.description;
-    
-    if(sv.service === 1){    	
-    	 if(names.indexOf(sv.call_name) !== -1){
-			 console.error(curFile ,':In function', node.id.name, '(Line', node.loc.start.line + '): publish the same service name --', sv.call_name);
-			 return -1;
-		 }    	 
-    	 return sv;
-    } 
-    
+
+    if (sv.service === 1) {
+        if (names.indexOf(sv.call_name) !== -1) {
+            console.error(curFile, ':In function', node.id.name, '(Line', node.loc.start.line + '): publish the same service name --', sv.call_name);
+            return -1;
+        }
+        return sv;
+    }
+
     return -1;
 }
 
-function verify(node) {    
-    switch (node.type) {       
+function verify(node) {
+    switch (node.type) {
         case esprima.Syntax.FunctionDeclaration:
             if (node.leadingComments.length === 1) {
-               var s =  analyze(node);
-               if (s !== -1){
-            	   names.push(s.call_name);
-            	   var n = path.basename(curFile, '.js');
-            	   if(typeof  services[n] === 'undefined'){
-            		   services[n] = [];
-            	   }
-            	   services[n].push(s);
-               }               
+                var s = analyze(node);
+                if (s !== -1) {
+                    names.push(s.call_name);
+                    var n = path.basename(curFile, '.js');
+                    if (typeof services[n] === 'undefined') {
+                        services[n] = [];
+                    }
+                    services[n].push(s);
+                }
             }
             break;
         default:
@@ -87,86 +87,88 @@ function verify(node) {
     }
 }
 
-function check(filename) { 
-	var content, tree;   
-	curFile = filename;
-	
+function check(filename) {
+    var content, tree;
+    curFile = filename;
+
     try {
         content = S(fs.readFileSync(filename, 'utf-8')).trimRight().s;
-        tree = esprima.parse(content, { attachComment: true, loc: true });
-        estraverse.traverse(tree, { enter: verify });
-        
+        tree = esprima.parse(content, {attachComment: true, loc: true});
+        estraverse.traverse(tree, {enter: verify});
+
         var n = path.basename(filename, '.js');
         var str_s = "";
-        services[n].forEach(function(p){
-        	if(p.service ===1 && typeof p.deprecated === 'undefined'){
-        		str_s = (str_s ==="" ? "" : str_s + ",") + "'" + p.call_name + "':"+p.name;
-        	}
+        services[n].forEach(function (p) {
+            if (p.service === 1 && typeof p.deprecated === 'undefined') {
+                str_s = (str_s === "" ? "" : str_s + ",") + "'" + p.call_name + "':" + p.name;
+            }
         });
-  
-        if(str_s === ""){
-        	return ;
+
+        if (str_s === "") {
+            return;
         }
-        
+
         str_s = "var services={" + str_s + "};";
-        var str_service=/(var\s+services\s*=\s*{[^{}]+};)/g;
-        var str_export=/(exports.services\s*=\s*services;)/g;
-       
-        var match = XRegExp.exec(content, str_service);
-        if( match !== null){
-        	content = XRegExp.replace(content, str_service,str_s);      	
-        }else{
-        	content = content + "\n\n" + str_s;
+        var str_service = /(var\s+services\s*=\s*{[^{}]+};)/g;
+        var str_export = /(exports.services\s*=\s*services;)/g;
+
+        let match = XRegExp.exec(content, str_service);
+        if (match !== null) {
+            content = XRegExp.replace(content, str_service, str_s);
+        } else {
+            content = content + "\n\n" + str_s;
         }
-        
-        var match = XRegExp.exec(content, str_export);
-        if(match===null){        	
-        	content = content + "\nexports.services=services;\n";
+
+        match = XRegExp.exec(content, str_export);
+        if (match === null) {
+            content = content + "\nexports.services=services;\n";
         }
-        
-        fs.writeFileSync(filename,content,'utf-8');
+
+        fs.writeFileSync(filename, content, 'utf-8');
         var ejs = require('ejs');
     } catch (e) {
-        console.error("error: " , e.toString(),e.stack);
+        console.error("error: ", e.toString(), e.stack);
         process.exit(1);
     }
 }
 
-function buildAllServices(){
-	var walker  = walk.walk('./services', { followLinks: false });
-	var path = require('path');
-	var S = require('string');
+function buildAllServices() {
+    var walker = walk.walk('./services', {followLinks: false});
+    var path = require('path');
+    var S = require('string');
     services = [];
-	walker.on('file', function(root, stat, next) {  
-		if(S(stat.name).startsWith("service_") && path.extname(stat.name) ===".js"){  
-			check("./services/" + stat.name);			
-		}	
-	    next();
-	});
+    walker.on('file', function (root, stat, next) {
+        if (S(stat.name).startsWith("service_") && path.extname(stat.name) === ".js") {
+            check("./services/" + stat.name);
+        }
+        next();
+    });
 
-	walker.on('end', function() {
-		console.log(services);
-		saveToHtml("all_services");
-	});	
+    walker.on('end', function () {
+        console.log(services);
+        saveToHtml("all_services");
+    });
 }
 
-function buildService(filename){
-	check("./services/" + filename);
-	saveToHtml(path.basename(filename));
+function buildService(filename) {
+    check("./services/" + filename);
+    saveToHtml(path.basename(filename));
 }
 
-function saveToHtml(outname){
-	var content = ejs.render(fs.readFileSync("./views/serivces.ejs", 'utf-8'), {"services":services});	
-	fs.writeFile("./out/" + outname +".html", content,'utf-8',function(err){
-		if(err) throw err;
-		console.log("SUCCESSFULLY SAVE TO ",outname+".html");
-	});
+function saveToHtml(outname) {
+    var content = ejs.render(fs.readFileSync("./views/serivces.ejs", 'utf-8'), {"services": services});
+    fs.writeFile("./out/" + outname + ".html", content, 'utf-8', function (err) {
+        if (err) {
+            throw err;
+        }
+        console.log("SUCCESSFULLY SAVE TO ", outname + ".html");
+    });
 }
 
 if (process.argv.length > 2) {
-	var filename =  "service_" + process.argv[2] + ".js";
-	buildService(filename);
-}else{
+    var filename = "service_" + process.argv[2] + ".js";
+    buildService(filename);
+} else {
     console.log("build all service");
     buildAllServices();
 }
